@@ -153,7 +153,9 @@
             var today = new Date().toISOString().split('T')[0];
             document.getElementById('date').value = today;
         });
-        
+         <div class="buttons">
+        <button class="export-btn" onclick="exportPDF()">تصدير ومشاركة</button>
+    </div>
         // دالة لعرض قائمة الملفات المصدرة
         function loadExportedFiles() {
             const filesList = document.getElementById('exported-files-list');
