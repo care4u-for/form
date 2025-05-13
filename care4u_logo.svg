@@ -1,5 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="200" height="100" viewBox="0 0 200 100">
-    <rect width="200" height="100" fill="#ffffff" rx="10" ry="10"/>
-    <text x="100" y="60" font-family="Arial" font-size="24" font-weight="bold" text-anchor="middle" fill="#c026a7">CARE4U</text>
-    <text x="100" y="85" font-family="Arial" font-size="20" font-weight="bold" text-anchor="middle" fill="#c026a7">KSA</text>
-</svg> 
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="100" viewBox="0 0 280 100">
+  <defs>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9000d6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a300e8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background (Optional, transparent) -->
+  <rect width="280" height="100" fill="#ffffff" rx="5" ry="5" />
+  
+  <!-- Simple Text Logo -->
+  <text x="140" y="60" font-family="Arial" font-size="42" font-weight="bold" text-anchor="middle" fill="url(#purpleGrad)">Care4uKSA</text>
+</svg>
