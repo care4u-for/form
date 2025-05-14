@@ -252,10 +252,27 @@
             width: auto;
             margin-left: 5px;
         }
+        
+        .flag-icon {
+            display: inline-block;
+            vertical-align: middle;
+            width: 32px;
+            height: 22px;
+            margin-left: 8px;
+            animation: flag-wave 1.2s infinite linear alternate;
+        }
+        @keyframes flag-wave {
+            0% { transform: rotate(-3deg) scale(1.05); }
+            100% { transform: rotate(3deg) scale(1.1); }
+        }
     </style>
 </head>
 <body>
     <div id="login-screen" class="login-container">
+        <div class="lang-switch" onclick="toggleLanguage()" id="lang-btn">
+            <span id="lang-flag" class="flag-icon"></span>
+            <span id="lang-text">English</span>
+        </div>
         <svg xmlns="http://www.w3.org/2000/svg" width="200" height="80" viewBox="0 0 280 100" class="logo">
           <defs>
             <linearGradient id="purpleGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -270,17 +287,20 @@
         <h2 id="login-title">تسجيل الدخول</h2>
         <div class="form-group">
             <label for="username" id="username-label">اسم المستخدم</label>
-            <input type="text" id="username" name="username">
+            <select id="username" name="username"></select>
         </div>
         <div class="form-group">
             <label for="password" id="password-label">كلمة المرور</label>
-            <input type="password" id="password" name="password">
+            <input type="text" id="password" name="password">
         </div>
         <button class="btn btn-primary" onclick="login()" id="login-btn">دخول</button>
+        <div style="margin-top: 30px; font-size: 15px; color: #555;">
+            إذا واجهت أي مشكلة تواصل مع
+            <a href="mailto:a.aziz@care4uksa.com" style="color: #4a0063; text-decoration: underline;">a.aziz@care4uksa.com</a>
+        </div>
     </div>
 
     <div id="main-content" style="display: none;">
-        <div class="lang-switch" onclick="toggleLanguage()" id="lang-btn">English</div>
         <div class="logout-btn" onclick="logout()" id="logout-btn">تسجيل الخروج</div>
         <div class="admin-btn" onclick="toggleAdminPanel()" id="admin-btn" style="display: none;">إدارة المستخدمين</div>
         
@@ -582,15 +602,27 @@
         let users = [];
         let currentUser = null;
         
-        // تحميل المستخدمين من التخزين المحلي أو استخدام القائمة الافتراضية
+        // أضف كود جافاسكريبت لتعبئة قائمة أسماء المستخدمين عند تحميل الصفحة
+        function fillUsernamesSelect() {
+            const usernameSelect = document.getElementById('username');
+            if (!usernameSelect) return;
+            usernameSelect.innerHTML = '';
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.username;
+                option.textContent = user.username;
+                usernameSelect.appendChild(option);
+            });
+        }
+        
+        // استدعِ fillUsernamesSelect بعد تحميل المستخدمين
         function loadUsers() {
             try {
                 const savedUsers = localStorage.getItem('users');
                 if (savedUsers) {
                     users = JSON.parse(savedUsers);
-                    // التأكد من أن المسؤول موجود دائماً
                     if (!users.some(u => u.username === 'admin')) {
-                        users.push(defaultUsers[0]); // إضافة حساب المسؤول
+                        users.push(defaultUsers[0]);
                         saveUsers();
                     }
                 } else {
@@ -602,6 +634,7 @@
                 users = [...defaultUsers];
                 saveUsers();
             }
+            fillUsernamesSelect(); // تعبئة القائمة بعد تحميل المستخدمين
         }
         
         // حفظ المستخدمين في التخزين المحلي
@@ -794,7 +827,8 @@
                 console.log("المستخدم غير موجود");
             }
             
-            const user = users.find(u => u.username === username && u.password === password);
+            // اجعل التحقق من كلمة المرور غير حساس لحالة الأحرف
+            const user = users.find(u => u.username === username && u.password.toLowerCase() === password.toLowerCase());
             
             if (user) {
                 currentUser = user;
@@ -807,7 +841,7 @@
                     saveUsers();
                     
                     // محاولة تسجيل الدخول مرة أخرى بعد إعادة تعيين المستخدمين
-                    const user = users.find(u => u.username === username && u.password === password);
+                    const user = users.find(u => u.username === username && u.password.toLowerCase() === password.toLowerCase());
                     if (user) {
                         currentUser = user;
                         localStorage.setItem('currentUser', JSON.stringify(user));
@@ -905,6 +939,13 @@
                 option.textContent = method;
                 paymentSelect.appendChild(option);
             });
+            
+            updateFlagIcon();
+            // تحديث نص الزر
+            var langText = document.getElementById('lang-text');
+            if (langText) {
+                langText.textContent = currentLang === 'ar' ? 'English' : 'العربية';
+            }
         }
         
         // وظيفة توليد ملف PDF
@@ -1297,6 +1338,20 @@
                 input.focus();
             }
         }
+
+        function updateFlagIcon() {
+            const flag = document.getElementById('lang-flag');
+            if (!flag) return;
+            if (currentLang === 'ar') {
+                // علم السعودية SVG
+                flag.innerHTML = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 32'><rect width='48' height='32' fill='#198a00'/><text x='24' y='20' font-size='13' font-family='Arial' fill='white' text-anchor='middle'>لا إله إلا الله</text></svg>`;
+            } else {
+                // علم بريطانيا SVG
+                flag.innerHTML = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 32'><rect width='48' height='32' fill='#00247d'/><polygon points='0,0 48,32 48,0 0,32' fill='#fff'/><polygon points='0,0 48,32 20,32 0,12' fill='#cf142b'/><polygon points='48,0 0,32 28,32 48,12' fill='#cf142b'/><rect x='20' width='8' height='32' fill='#fff'/><rect y='12' width='48' height='8' fill='#fff'/><rect x='22' width='4' height='32' fill='#cf142b'/><rect y='14' width='48' height='4' fill='#cf142b'/></svg>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', updateFlagIcon);
     </script>
 </body>
 </html> 
