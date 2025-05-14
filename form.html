@@ -71,9 +71,33 @@
             color: #666; 
             font-size: 0.9em; 
         }
+        
+        .logout-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+        }
+        
+        .user-info {
+            position: absolute;
+            top: 10px;
+            right: 120px;
+            color: #4a0063;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
+    <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+    <div class="user-info" id="user-info"></div>
+    
     <div class="container" id="pdf-content">
         <div class="logo-row">
             <img src="logo.svg" alt="Care4u KSA Logo" id="logo-img">
@@ -82,10 +106,10 @@
         </div>
         <table>
             <tr><td>الاسم</td><td><input type="text" id="name"></td></tr>
-            <tr><td>رقم الهوية</td><td><input type="text" id="identity" maxlength="10" pattern="\d{10}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"></td></tr>
+            <tr><td>رقم الهوية</td><td><input type="text" id="identity" maxlength="10" pattern="\d{10}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" onblur="validateIdNumber(this)"></td></tr>
             <tr><td>العمر</td><td><input type="number" id="age" min="1" max="120"></td></tr>
             <tr><td>التاريخ</td><td><input type="date" id="date"></td></tr>
-            <tr><td>رقم التواصل</td><td><input type="text" id="phone" maxlength="10" pattern="\d{10}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"></td></tr>
+            <tr><td>رقم التواصل</td><td><input type="text" id="phone" maxlength="10" pattern="\d{10}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" onblur="validatePhoneNumber(this)"></td></tr>
             <tr><td>الشكوى</td><td><input type="text" id="complaint"></td></tr>
             <tr><td>هل يوجد أي نوع حساسية</td><td><div class="radio-group"><label><input type="radio" name="allergy" value="نعم"> نعم</label><label><input type="radio" name="allergy" value="لا"> لا</label></div></td></tr>
             <tr><td>هل يوجد أي امراض معدية</td><td><div class="radio-group"><label><input type="radio" name="infectious" value="نعم"> نعم</label><label><input type="radio" name="infectious" value="لا"> لا</label></div></td></tr>
@@ -128,8 +152,7 @@
     </div>
     
     <div class="buttons">
-        <button class="export-btn" onclick="exportPDF()">تصدير إلى PDF</button>
-        <button class="reset-btn" onclick="resetForm()">إعادة ضبط</button>
+        <button class="export-btn" onclick="exportPDF()">تصدير ومشاركة</button>
     </div>
     
     <!-- قائمة الملفات المصدرة -->
@@ -145,21 +168,49 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <script>
-        // استعادة قائمة الملفات المصدرة من التخزين المحلي عند تحميل الصفحة
+        // تحقق من المستخدم الحالي
+        let currentUser = null;
+        
         document.addEventListener('DOMContentLoaded', function() {
+            checkCurrentUser();
             loadExportedFiles();
             
             // ضبط التاريخ الافتراضي ليكون اليوم الحالي
             var today = new Date().toISOString().split('T')[0];
             document.getElementById('date').value = today;
         });
-         <div class="buttons">
-        <button class="export-btn" onclick="exportPDF()">تصدير ومشاركة</button>
-    </div>
+        
+        // تحقق من حالة تسجيل الدخول
+        function checkCurrentUser() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    // عرض اسم المستخدم
+                    document.getElementById('user-info').textContent = 'مرحباً، ' + currentUser.name;
+                } catch (e) {
+                    console.error('خطأ في قراءة بيانات المستخدم:', e);
+                    // إعادة توجيه المستخدم لصفحة تسجيل الدخول في حالة عدم وجود جلسة
+                    window.location.href = 'index.html';
+                }
+            } else {
+                // إعادة توجيه المستخدم لصفحة تسجيل الدخول في حالة عدم وجود جلسة
+                window.location.href = 'index.html';
+            }
+        }
+        
+        // وظيفة تسجيل الخروج
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+        
         // دالة لعرض قائمة الملفات المصدرة
         function loadExportedFiles() {
+            if (!currentUser) return;
+            
             const filesList = document.getElementById('exported-files-list');
-            const savedFiles = JSON.parse(localStorage.getItem('exportedFiles')) || [];
+            const savedFiles = JSON.parse(localStorage.getItem('exportedFiles_' + currentUser.username)) || [];
             
             // تفريغ القائمة
             filesList.innerHTML = '';
@@ -182,8 +233,10 @@
         
         // دالة لحفظ ملف مصدر في قائمة الملفات
         function saveExportedFile(fileName) {
+            if (!currentUser) return;
+            
             // الحصول على قائمة الملفات المحفوظة
-            const savedFiles = JSON.parse(localStorage.getItem('exportedFiles')) || [];
+            const savedFiles = JSON.parse(localStorage.getItem('exportedFiles_' + currentUser.username)) || [];
             
             // إضافة الملف الجديد
             const now = new Date();
@@ -192,11 +245,12 @@
             savedFiles.push({
                 name: fileName,
                 date: formattedDate,
-                timestamp: now.getTime()
+                timestamp: now.getTime(),
+                user: currentUser.name
             });
             
             // حفظ القائمة المحدثة
-            localStorage.setItem('exportedFiles', JSON.stringify(savedFiles));
+            localStorage.setItem('exportedFiles_' + currentUser.username, JSON.stringify(savedFiles));
             
             // تحديث العرض
             loadExportedFiles();
@@ -221,17 +275,26 @@
         
         // وظيفة تصدير PDF
         function exportPDF() {
-            // تحقق من رقم الهوية ورقم التواصل
+            // تحقق من الاسم ورقم الهوية ورقم التواصل
+            var name = document.getElementById('name').value;
             var id = document.getElementById('identity').value;
             var phone = document.getElementById('phone').value;
             
-            if (id && id.length !== 10) {
-                alert('رقم الهوية يجب أن يكون 10 أرقام');
+            // التحقق من وجود اسم
+            if (!name || name.trim() === '') {
+                alert('يجب إدخال الاسم');
                 return;
             }
             
-            if (phone && phone.length !== 10) {
-                alert('رقم التواصل يجب أن يكون 10 أرقام');
+            // التحقق من رقم الهوية
+            if (!id || id.length !== 10 || !/^\d{10}$/.test(id)) {
+                alert('رقم الهوية يجب أن يكون بالضبط 10 أرقام');
+                return;
+            }
+            
+            // التحقق من رقم الجوال
+            if (!phone || phone.length !== 10 || !/^\d{10}$/.test(phone)) {
+                alert('رقم الجوال يجب أن يكون بالضبط 10 أرقام');
                 return;
             }
             
@@ -271,9 +334,10 @@
                         
                         pdf.addImage(imgData, 'JPEG', 20, 20, imgWidth, imgHeight, undefined, 'FAST');
                         
-                        // إضافة اسم الملف حسب اسم المريض
-                        const patientName = document.getElementById('name').value || 'مريض';
-                        const fileName = `نموذج-زيارة-${patientName}.pdf`;
+                        // إضافة اسم الملف حسب اسم المريض ورقم الهوية
+                        const patientName = document.getElementById('name').value;
+                        const patientID = document.getElementById('identity').value;
+                        const fileName = `نموذج-زيارة-${patientName}-${patientID}.pdf`;
                         
                         // حفظ الملف
                         pdf.save(fileName);
@@ -282,6 +346,30 @@
                         saveExportedFile(fileName);
                         
                         alert('تم تصدير الملف بنجاح!');
+                        
+                        // إضافة خاصية المشاركة
+                        setTimeout(() => {
+                            // التحقق من دعم واجهة المشاركة في المتصفح
+                            if (navigator.share) {
+                                const blob = pdf.output('blob');
+                                const file = new File([blob], fileName, { type: 'application/pdf' });
+                                
+                                navigator.share({
+                                    title: 'نموذج طلب خدمة Care4u KSA',
+                                    text: `طلب خدمة من ${patientName} - رقم الهوية: ${patientID}`,
+                                    files: [file]
+                                }).then(() => {
+                                    console.log('تمت المشاركة بنجاح');
+                                }).catch((error) => {
+                                    console.log('حدث خطأ أثناء المشاركة:', error);
+                                    // إذا لم تنجح المشاركة المباشرة، نعرض خيار المشاركة البديل
+                                    shareViaEmail(fileName, patientName, patientID);
+                                });
+                            } else {
+                                // إذا كان المتصفح لا يدعم واجهة المشاركة
+                                shareViaEmail(fileName, patientName, patientID);
+                            }
+                        }, 1000); // انتظار ثانية بعد تصدير الملف
                         
                     } catch (error) {
                         console.error('حدث خطأ:', error);
@@ -298,6 +386,41 @@
                     document.querySelector('.export-btn').disabled = false;
                 });
             }, 100);
+        }
+        
+        // وظيفة المشاركة عبر البريد الإلكتروني
+        function shareViaEmail(fileName, patientName, patientID) {
+            const userResponse = confirm('هل ترغب في مشاركة الملف عبر البريد الإلكتروني؟');
+            if (userResponse) {
+                // استخراج بيانات إضافية من النموذج
+                const service = document.getElementById('service').value || 'خدمة';
+                const phone = document.getElementById('phone').value;
+                
+                // إعداد رابط البريد الإلكتروني
+                const subject = encodeURIComponent(`طلب خدمة - ${service} - Care4u KSA`);
+                const body = encodeURIComponent(`مرحباً،\n\nمرفق ملف PDF للطلب المقدم من ${patientName}.\nرقم الهوية: ${patientID}\nرقم الجوال: ${phone}\n\nشكراً،\nCare4u KSA`);
+                
+                // فتح تطبيق البريد الإلكتروني
+                window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+            }
+        }
+        
+        // وظيفة التحقق من رقم الهوية
+        function validateIdNumber(input) {
+            const value = input.value.trim();
+            if (value && value.length !== 10) {
+                alert('رقم الهوية يجب أن يكون بالضبط 10 أرقام');
+                input.focus();
+            }
+        }
+        
+        // وظيفة التحقق من رقم الجوال
+        function validatePhoneNumber(input) {
+            const value = input.value.trim();
+            if (value && value.length !== 10) {
+                alert('رقم الجوال يجب أن يكون بالضبط 10 أرقام');
+                input.focus();
+            }
         }
     </script>
 </body>
