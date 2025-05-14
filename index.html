@@ -247,8 +247,7 @@
             margin: 0 10px;
             font-weight: normal;
         }
-        
-        .radio-group input[type="radio"] {
+                .radio-group input[type="radio"] {
             width: auto;
             margin-left: 5px;
         }
@@ -256,10 +255,16 @@
 </head>
 <body>
     <div id="login-screen" class="login-container">
-        <svg xmlns="http://www.w3.org/2000/svg" width="200" height="100" viewBox="0 0 200 100" class="logo">
-            <rect width="200" height="100" fill="#ffffff" rx="10" ry="10"/>
-            <text x="100" y="60" font-family="Arial" font-size="24" font-weight="bold" text-anchor="middle" fill="#4a0063">CARE4U</text>
-            <text x="100" y="85" font-family="Arial" font-size="20" font-weight="bold" text-anchor="middle" fill="#4a0063">KSA</text>
+        <svg xmlns="http://www.w3.org/2000/svg" width="200" height="80" viewBox="0 0 280 100" class="logo">
+          <defs>
+            <linearGradient id="purpleGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#9000d6;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#a300e8;stop-opacity:1" />
+            </linearGradient>
+          </defs>
+          
+          <!-- Simple Text Logo -->
+          <text x="140" y="60" font-family="Arial" font-size="42" font-weight="bold" text-anchor="middle" fill="url(#purpleGrad1)">Care4uKSA</text>
         </svg>
         <h2 id="login-title">تسجيل الدخول</h2>
         <div class="form-group">
@@ -271,8 +276,6 @@
             <input type="password" id="password" name="password">
         </div>
         <button class="btn btn-primary" onclick="login()" id="login-btn">دخول</button>
-        <div style="margin-top: 15px; font-size: 14px;">
-        </div>
     </div>
 
     <div id="main-content" style="display: none;">
@@ -309,10 +312,16 @@
         
         <div class="container">
             <div class="header">
-                <svg xmlns="http://www.w3.org/2000/svg" width="200" height="100" viewBox="0 0 200 100" class="logo">
-                    <rect width="200" height="100" fill="#ffffff" rx="10" ry="10"/>
-                    <text x="100" y="60" font-family="Arial" font-size="24" font-weight="bold" text-anchor="middle" fill="#4a0063">CARE4U</text>
-                    <text x="100" y="85" font-family="Arial" font-size="20" font-weight="bold" text-anchor="middle" fill="#4a0063">KSA</text>
+                <svg xmlns="http://www.w3.org/2000/svg" width="200" height="80" viewBox="0 0 280 100" class="logo">
+                  <defs>
+                    <linearGradient id="purpleGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style="stop-color:#9000d6;stop-opacity:1" />
+                      <stop offset="100%" style="stop-color:#a300e8;stop-opacity:1" />
+                    </linearGradient>
+                  </defs>
+                  
+                  <!-- Simple Text Logo -->
+                  <text x="140" y="60" font-family="Arial" font-size="42" font-weight="bold" text-anchor="middle" fill="url(#purpleGrad2)">Care4uKSA</text>
                 </svg>
                 <h1 id="form-title">نموذج طلب خدمة</h1>
             </div>
@@ -324,7 +333,7 @@
             
             <div class="form-group">
                 <label for="identity" id="identity-label">رقم الهوية</label>
-                <input type="text" id="identity" name="identity" maxlength="10" pattern="\d{10}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)">
+                <input type="text" id="identity" name="identity" maxlength="10" pattern="\d{10}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" onblur="validateIdNumber(this)">
             </div>
             
             <div class="form-group">
@@ -339,7 +348,7 @@
             
             <div class="form-group">
                 <label for="phone" id="phone-label">رقم الجوال</label>
-                <input type="tel" id="phone" name="phone" maxlength="10" pattern="\d{10}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)">
+                <input type="tel" id="phone" name="phone" maxlength="10" pattern="\d{10}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" onblur="validatePhoneNumber(this)">
             </div>
             
             <div class="form-group">
@@ -441,7 +450,7 @@
             </div>
             
             <div class="buttons">
-                <button class="btn btn-primary" onclick="generatePDF()" id="export-btn">تصدير PDF</button>
+                <button class="btn btn-primary" onclick="generatePDF()" id="export-btn">تصدير ومشاركة</button>
             </div>
             
             <div class="file-list">
@@ -481,14 +490,14 @@
                 accountLabel: "الحساب",
                 paymentLabel: "طريقة الدفع",
                 notesLabel: "ملاحظات",
-                exportBtn: "تصدير PDF",
+                exportBtn: "تصدير ومشاركة",
                 resetBtn: "إعادة ضبط",
                 langBtn: "English",
                 fileListTitle: "الملفات المصدرة",
                 loginTitle: "تسجيل الدخول",
                 usernameLabel: "اسم المستخدم",
                 passwordLabel: "كلمة المرور",
-                loginBtn: "دخول",
+                                loginBtn: "دخول",
                 logoutBtn: "تسجيل الخروج",
                 adminBtn: "إدارة المستخدمين",
                 services: [
@@ -528,7 +537,7 @@
                 accountLabel: "Account",
                 paymentLabel: "Payment Method",
                 notesLabel: "Notes",
-                exportBtn: "Export PDF",
+                exportBtn: "Export & Share",
                 resetBtn: "Reset",
                 langBtn: "عربي",
                 fileListTitle: "Exported Files",
@@ -738,7 +747,7 @@
         // تحقق مما إذا كان المستخدم مسجل دخوله مسبقًا
         function checkLoginStatus() {
             loadUsers();  // تحميل بيانات المستخدمين
-            const savedUser = localStorage.getItem('currentUser');
+                    const savedUser = localStorage.getItem('currentUser');
             if (savedUser) {
                 try {
                     currentUser = JSON.parse(savedUser);
@@ -851,7 +860,6 @@
             document.getElementById('payment-label').textContent = translations[currentLang].paymentLabel;
             document.getElementById('notes-label').textContent = translations[currentLang].notesLabel;
             document.getElementById('export-btn').textContent = translations[currentLang].exportBtn;
-            document.getElementById('reset-btn').textContent = translations[currentLang].resetBtn;
             document.getElementById('lang-btn').textContent = translations[currentLang].langBtn;
             document.getElementById('file-list-title').textContent = translations[currentLang].fileListTitle;
             document.getElementById('login-title').textContent = translations[currentLang].loginTitle;
@@ -907,6 +915,29 @@
                     return;
                 }
                 
+                // تحقق من الاسم ورقم الهوية ورقم الجوال
+                var name = document.getElementById('name').value;
+                var id = document.getElementById('identity').value;
+                var phone = document.getElementById('phone').value;
+                
+                // التحقق من وجود اسم
+                if (!name || name.trim() === '') {
+                    alert('يجب إدخال الاسم');
+                    return;
+                }
+                
+                // التحقق من رقم الهوية
+                if (!id || id.length !== 10 || !/^\d{10}$/.test(id)) {
+                    alert('رقم الهوية يجب أن يكون بالضبط 10 أرقام');
+                    return;
+                }
+                
+                // التحقق من رقم الجوال
+                if (!phone || phone.length !== 10 || !/^\d{10}$/.test(phone)) {
+                    alert('رقم الجوال يجب أن يكون بالضبط 10 أرقام');
+                    return;
+                }
+                
                 // إخفاء العناصر التي لا نريد طباعتها
                 const buttonsDiv = document.querySelector('.buttons');
                 const fileListDiv = document.querySelector('.file-list');
@@ -947,15 +978,42 @@
                     pdf.addImage(imgData, 'JPEG', imgX, 0, imgWidth * ratio, imgHeight * ratio);
                     
                     // استخراج البيانات لاسم الملف
-                    const nameInput = document.getElementById('name').value || 'unnamed';
+                    const nameInput = document.getElementById('name').value;
+                    const patientID = document.getElementById('identity').value;
                     const dateStr = new Date().toLocaleDateString().replace(/\//g, '-');
-                    const fileName = `Care4u_${nameInput}_${dateStr}.pdf`;
+                    const fileName = `Care4u_${nameInput}_${patientID}_${dateStr}.pdf`;
                     
                     // حفظ الملف
                     pdf.save(fileName);
                     
                     // إضافة الملف إلى القائمة
                     addFileToList(fileName);
+                    
+                    // إضافة خاصية المشاركة
+                    setTimeout(() => {
+                        if (navigator.share) {
+                            // التحقق من دعم واجهة المشاركة
+                            const blob = pdf.output('blob');
+                            const file = new File([blob], fileName, { type: 'application/pdf' });
+                            
+                            // عرض نافذة المشاركة
+                                                    navigator.share({
+                                title: 'نموذج طلب الخدمة - Care4u KSA',
+                                text: `طلب خدمة من ${nameInput} - رقم الهوية: ${patientID}`,
+                                files: [file]
+                            }).then(() => {
+                                console.log('تمت المشاركة بنجاح');
+                            }).catch((error) => {
+                                console.log('حدث خطأ أثناء المشاركة:', error);
+                                // إذا لم تنجح المشاركة المباشرة، نعرض خيار المشاركة البديل
+                                showShareOptions(fileName, nameInput, patientID);
+                            });
+                        } else {
+                            // إذا لم يكن هناك دعم لواجهة المشاركة، نعرض خيارات المشاركة البديلة
+                            showShareOptions(fileName, nameInput, patientID);
+                        }
+                    }, 1000); // انتظار ثانية واحدة بعد تصدير الملف
+                    
                 }).catch(err => {
                     console.error('خطأ في إنشاء الصورة للنموذج:', err);
                     alert('حدث خطأ أثناء إنشاء ملف PDF. يرجى المحاولة مرة أخرى.');
@@ -963,6 +1021,23 @@
             } catch (e) {
                 console.error('خطأ في توليد PDF:', e);
                 alert('حدث خطأ أثناء إنشاء ملف PDF. يرجى المحاولة مرة أخرى.');
+            }
+        }
+        
+        // وظيفة عرض خيارات المشاركة البديلة
+        function showShareOptions(fileName, patientName, patientID) {
+            const userResponse = confirm('هل ترغب في مشاركة الملف عبر البريد الإلكتروني؟');
+            if (userResponse) {
+                // استخراج بيانات المستخدم لاستخدامها في المشاركة
+                const service = document.getElementById('service').value || 'خدمة';
+                const phone = document.getElementById('phone').value;
+                
+                // فتح عميل البريد الإلكتروني مع رسالة معدة مسبقًا
+                const subject = encodeURIComponent(`طلب خدمة - ${service} - Care4u KSA`);
+                const body = encodeURIComponent(`مرحباً،\n\nمرفق ملف PDF للطلب المقدم من ${patientName}.\nرقم الهوية: ${patientID}\nرقم الجوال: ${phone}\n\nشكراً،\nCare4u KSA`);
+                
+                // فتح رابط البريد الإلكتروني (لا يمكن إرفاق الملف مباشرة ولكن يمكن تضمين رسالة)
+                window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
             }
         }
         
@@ -983,14 +1058,19 @@
         
         // حفظ قائمة الملفات في التخزين المحلي
         function saveFilesList() {
-            localStorage.setItem('exportedFiles', JSON.stringify(exportedFilesList));
+            if (!currentUser) return;
+            localStorage.setItem('exportedFiles_' + currentUser.username, JSON.stringify(exportedFilesList));
         }
         
         // تحميل قائمة الملفات من التخزين المحلي
         function loadSavedFiles() {
-            const savedFiles = localStorage.getItem('exportedFiles');
+            if (!currentUser) return;
+            const savedFiles = localStorage.getItem('exportedFiles_' + currentUser.username);
             if (savedFiles) {
                 exportedFilesList = JSON.parse(savedFiles);
+                displayFilesList();
+            } else {
+                exportedFilesList = [];
                 displayFilesList();
             }
         }
@@ -1155,24 +1235,23 @@
             updateLanguage();
         }
 
-        // إعادة تعيين المستخدمين الافتراضيين
-        function resetDefaultUsers() {
-            if (confirm('هذا سيعيد تعيين جميع المستخدمين إلى الإعدادات الافتراضية. هل أنت متأكد؟')) {
-                // مسح التخزين المحلي
-                localStorage.removeItem('users');
-                localStorage.removeItem('currentUser');
-                
-                // إعادة تعيين المستخدمين الافتراضيين
-                users = [...defaultUsers];
-                saveUsers();
-                
-                // تنبيه المستخدم
-                alert('تم إعادة تعيين المستخدمين الافتراضيين بنجاح. حاول تسجيل الدخول باستخدام:\nاسم المستخدم: admin\nكلمة المرور: admin123');
-                
-                // إعادة تحميل الصفحة
-                location.reload();
+        // وظيفة التحقق من رقم الهوية
+        function validateIdNumber(input) {
+            const value = input.value.trim();
+            if (value && value.length !== 10) {
+                alert('رقم الهوية يجب أن يكون بالضبط 10 أرقام');
+                input.focus();
+            }
+        }
+        
+        // وظيفة التحقق من رقم الجوال
+        function validatePhoneNumber(input) {
+            const value = input.value.trim();
+            if (value && value.length !== 10) {
+                alert('رقم الجوال يجب أن يكون بالضبط 10 أرقام');
+                input.focus();
             }
         }
     </script>
 </body>
-</html> 
+</html>
