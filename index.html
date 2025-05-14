@@ -247,7 +247,8 @@
             margin: 0 10px;
             font-weight: normal;
         }
-                .radio-group input[type="radio"] {
+        
+        .radio-group input[type="radio"] {
             width: auto;
             margin-left: 5px;
         }
@@ -497,7 +498,7 @@
                 loginTitle: "تسجيل الدخول",
                 usernameLabel: "اسم المستخدم",
                 passwordLabel: "كلمة المرور",
-                                loginBtn: "دخول",
+                loginBtn: "دخول",
                 logoutBtn: "تسجيل الخروج",
                 adminBtn: "إدارة المستخدمين",
                 services: [
@@ -747,7 +748,7 @@
         // تحقق مما إذا كان المستخدم مسجل دخوله مسبقًا
         function checkLoginStatus() {
             loadUsers();  // تحميل بيانات المستخدمين
-                    const savedUser = localStorage.getItem('currentUser');
+            const savedUser = localStorage.getItem('currentUser');
             if (savedUser) {
                 try {
                     currentUser = JSON.parse(savedUser);
@@ -907,7 +908,7 @@
         }
         
         // وظيفة توليد ملف PDF
-        function generatePDF() {
+        function generatePDF(skipAddToList = false) {
             try {
                 const { jsPDF } = window.jspdf;
                 if (!jsPDF) {
@@ -986,8 +987,10 @@
                     // حفظ الملف
                     pdf.save(fileName);
                     
-                    // إضافة الملف إلى القائمة
-                    addFileToList(fileName);
+                    // إضافة الملف إلى القائمة فقط إذا لم يكن الاستدعاء من تحميل ملف قديم
+                    if (!skipAddToList) {
+                        addFileToList(fileName);
+                    }
                     
                     // إضافة خاصية المشاركة
                     setTimeout(() => {
@@ -997,7 +1000,7 @@
                             const file = new File([blob], fileName, { type: 'application/pdf' });
                             
                             // عرض نافذة المشاركة
-                                                    navigator.share({
+                            navigator.share({
                                 title: 'نموذج طلب الخدمة - Care4u KSA',
                                 text: `طلب خدمة من ${nameInput} - رقم الهوية: ${patientID}`,
                                 files: [file]
@@ -1044,13 +1047,35 @@
         // إضافة ملف إلى قائمة الملفات المصدرة
         function addFileToList(fileName) {
             const now = new Date();
+            // اجمع بيانات النموذج
+            const formData = {
+                name: document.getElementById('name').value || '',
+                identity: document.getElementById('identity').value || '',
+                age: document.getElementById('age').value || '',
+                date: document.getElementById('date').value || '',
+                phone: document.getElementById('phone').value || '',
+                email: document.getElementById('email').value || '',
+                complaint: document.getElementById('complaint').value || '',
+                allergy: document.querySelector('input[name="allergy"]:checked')?.value || '',
+                infectious: document.querySelector('input[name="infectious"]:checked')?.value || '',
+                previous_operations: document.getElementById('previous_operations').value || '',
+                analysis: document.querySelector('input[name="analysis"]:checked')?.value || '',
+                medical_report: document.querySelector('input[name="medical_report"]:checked')?.value || '',
+                doctor_visit: document.querySelector('input[name="doctor_visit"]:checked')?.value || '',
+                service: document.getElementById('service').value || '',
+                visit_duration: document.getElementById('visit_duration').value || '',
+                coordinator: document.getElementById('coordinator').value || '',
+                account: document.getElementById('account').value || '',
+                payment: document.getElementById('payment').value || '',
+                notes: document.getElementById('notes').value || ''
+            };
             const fileInfo = {
                 name: fileName,
                 date: now.toLocaleDateString(),
                 time: now.toLocaleTimeString(),
-                user: currentUser.name
+                user: currentUser.name,
+                formData: formData // أضف بيانات النموذج هنا
             };
-            
             exportedFilesList.push(fileInfo);
             saveFilesList();
             displayFilesList();
@@ -1079,21 +1104,41 @@
         function displayFilesList() {
             const fileListContainer = document.getElementById('exported-files');
             fileListContainer.innerHTML = '';
-            
             if (exportedFilesList.length === 0) {
                 fileListContainer.innerHTML = '<p>' + (currentLang === 'ar' ? 'لا توجد ملفات مصدرة' : 'No exported files') + '</p>';
                 return;
             }
-            
             exportedFilesList.forEach((file, index) => {
                 const fileItem = document.createElement('div');
                 fileItem.className = 'file-item';
                 fileItem.innerHTML = `
-                    <div>${file.name}</div>
+                    <div>
+                        <a href="#" onclick="downloadExportedPDF(${index}); return false;">${file.name}</a>
+                    </div>
                     <div>${file.date} ${file.time} - ${file.user}</div>
                 `;
                 fileListContainer.appendChild(fileItem);
             });
+        }
+        
+        // إضافة دالة جديدة لتحميل PDF من بيانات محفوظة
+        function downloadExportedPDF(index) {
+            const file = exportedFilesList[index];
+            if (!file || !file.formData) {
+                alert('لا توجد بيانات لهذا الملف.');
+                return;
+            }
+            for (const key in file.formData) {
+                if (document.getElementById(key)) {
+                    document.getElementById(key).value = file.formData[key];
+                }
+                if (["allergy","infectious","analysis","medical_report","doctor_visit"].includes(key) && file.formData[key]) {
+                    const radio = document.querySelector(`input[name="${key}"][value="${file.formData[key]}"]`);
+                    if (radio) radio.checked = true;
+                }
+            }
+            // استدعِ generatePDF مع skipAddToList = true
+            generatePDF(true);
         }
         
         // إعادة ضبط النموذج
@@ -1254,4 +1299,4 @@
         }
     </script>
 </body>
-</html>
+</html> 
